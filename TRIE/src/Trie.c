@@ -312,6 +312,7 @@ void DeleteFromTrie(Root* pTrie, char* pString)
 
 int main()
 {
+	Check();
 	return 0;
 }
 #endif
