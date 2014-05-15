@@ -29,14 +29,18 @@ struct _tRoot
 typedef struct _tRoot Root;
 
 
-Node*	CreateNode();
-Root*	CreateTrie();
+Node* CreateNode();
+Root* CreateTrie();
 
-void	SaveHelper(Node* pTrie, char* pString, int pDataToSave, int pLevel,int pLength);
-void	Save(Node* pTrie, char* pString, int pDataToSave);
+void SaveHelper(Node* pTrie, char* pString, int pDataToSave, int pLevel,int pLength);
+void Save(Root* pTrie, char* pString, int pDataToSave);
 
-int		SearchTrie(Node* pTrie, char* pString);
-int		SearchHelper(Node* pTrie, char* pString,int pLevel, int pLength);
+int SearchHelper(Node* pTrie, char* pString,int pLevel, int pLength);
+int SearchTrie(Root* pTrie, char* pString);
+
+
+void DeleteHelper(Node* pTrie, char* pString, int pLevel, int pLength, int* pDeleteThisNode);
+void DeleteFromTrie(Root* pTrie, char* pString);
 
 Root* Run();
 void Check();
@@ -190,9 +194,140 @@ void Check()
 	else printf("%s exists\n","Cersei");
 }
 
+/* Delete the pString from the the trie.
+// Testcases: 
+	1. The key pString is independent; Not a part of any other key. Delete all the nodes
+	2. The key pString shares a prefix with some other key. Delete the nodes upto where there is branching
+	3. The whole key itself is a prefix to some other key. Initialize the data as -1. Dont delete
+	4. Some other key is prefix of this key. Delete all nodes upto where the prefix key ends.
+	5. Key does not exist. Show error.
+*/
+void DeleteHelper(Node* pTrie, char* pString, int pLevel, int pLength, int* pDeleteThisNode)
+{
+		char	ch;
+		int		childIndex,i, moreSubChildrenExist = 0;
+
+	// leaf node(last node of the key)
+	if(pLevel==pLength)
+	{
+		// check; for no other key should originate from here
+		for(i=0;i<ALPHABET_SIZE;i++)
+		{
+			if(pTrie->children[i])
+			{
+				*pDeleteThisNode = 0;
+				moreSubChildrenExist = 1;
+				break;
+			}
+		}
+		// can't delete
+		if(moreSubChildrenExist)
+		{
+			pTrie->data			= -1;
+			*pDeleteThisNode	= 0;
+			return ;
+		}
+		else
+		{
+			free(pTrie);
+			pTrie				= NULL;
+			*pDeleteThisNode	= 1;
+		}
+	}
+	// not the leaf node
+	else
+	{
+		ch = pString[pLevel];
+
+		// A to Z
+		if(ch>=65 && ch<=90)
+			childIndex = ch - 65;
+	
+		// a to z
+		else if(ch>=97 && ch<=122)
+			childIndex = ch-97 + 26;
+		
+		// child does not exist. Allocate memory for it
+		if(!pTrie->children[childIndex])
+		{
+			printf("The key %s does not exist and hence can't delete.\n",pString);
+			*pDeleteThisNode = 0;
+			return ;
+		}
+		// call this function with the next key
+		else
+		{
+			DeleteHelper(pTrie->children[childIndex],pString,pLevel+1,pLength,pDeleteThisNode);
+		}
+
+		// told to delete this node. the child node has been deleted. Set the pointer pTrie->children[childIndex] to NULL
+		if(*pDeleteThisNode)
+		{
+			pTrie->children[childIndex] = NULL;
+			// check for no other key should originate from here
+			for(i=0;i<ALPHABET_SIZE;i++)
+			{
+				if(pTrie->children[i])
+				{
+					*pDeleteThisNode		= 0;
+					moreSubChildrenExist	= 1;
+					break;
+				}
+			}
+
+			// some other key is a child
+			if(moreSubChildrenExist)
+			{
+				// communicate this back to the caller function
+				*pDeleteThisNode	= 0;
+				return;
+			}
+			// delete this node
+			else
+			{
+				free(pTrie);
+				pTrie = NULL;
+				// although the value of *pDeleteThisNode is 1 here; still again setting it just
+				// for the sake of it.
+				*pDeleteThisNode = 1;
+			}
+		}
+		// told not to delete this node
+		else
+		{
+			// nothing to do
+			;
+		}
+	}
+}
+
+// Delete the string pString from the Trie
+void DeleteFromTrie(Root* pTrie, char* pString)
+{
+	// Decrease the count pTrie->numChildren
+	//pTrie->numChildren--;
+	int deleteThisNode=1;
+	DeleteHelper(pTrie->trie,pString,0,strlen(pString),&deleteThisNode);
+}
+
 int main()
 {
-	Check();
+	Root* root	= NULL;
+	root		= CreateTrie();
+
+	Save(root,"Jo",1);
+	Save(root,"Jon",1);
+	Save(root,"Tim",1);
+	Save(root,"Jony",1);
+	Save(root,"Job",1);
+
+	DeleteFromTrie(root,"Tim");
+
+	DeleteFromTrie(root,"Jon");
+	DeleteFromTrie(root,"Jo");
+	
+	DeleteFromTrie(root,"Jony");
+	DeleteFromTrie(root,"Jones");
 	return 0;
 }
 #endif
