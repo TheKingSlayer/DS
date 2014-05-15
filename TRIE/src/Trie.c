@@ -312,22 +312,6 @@ void DeleteFromTrie(Root* pTrie, char* pString)
 
 int main()
 {
-	Root* root	= NULL;
-	root		= CreateTrie();
-
-	Save(root,"Jo",1);
-	Save(root,"Jon",1);
-	Save(root,"Tim",1);
-	Save(root,"Jony",1);
-	Save(root,"Job",1);
-
-	DeleteFromTrie(root,"Tim");
-
-	DeleteFromTrie(root,"Jon");
-	DeleteFromTrie(root,"Jo");
-	
-	DeleteFromTrie(root,"Jony");
-	DeleteFromTrie(root,"Jones");
 	return 0;
 }
 #endif
