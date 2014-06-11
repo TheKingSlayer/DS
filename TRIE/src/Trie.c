@@ -1,5 +1,3 @@
-//JSR
-#define TRIE
 #ifdef	TRIE
 
 #include<stdio.h>
