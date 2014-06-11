@@ -188,12 +188,13 @@ int main()
 		int spaceForSegTreeArr, minElementIndex;
 		time_t startTime, endTime;
 		double seconds;
+		
 	mainArray	= (int*)malloc(sizeof(int)*NumElements);
 
 	// fill the array upto NumElements with random numbers
 	fillArr();
 
-	// allocate array of size 
+	// allocate array of size equal to nlogn
 	spaceForSegTreeArr			= NumElements *(log((double)NumElements) / log((double)2));
 	
 	segmentTreeArray			= (int*)malloc(sizeof(int)*spaceForSegTreeArr);
